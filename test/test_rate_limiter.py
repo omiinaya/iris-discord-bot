@@ -1,4 +1,5 @@
 """Unit tests for rate limiting utilities."""
+
 import asyncio
 import time
 import unittest
@@ -140,10 +141,7 @@ class TestRateLimiter(unittest.TestCase):
 class TestGetLimiterFromEnv(unittest.TestCase):
     """Test get_limiter_from_env function."""
 
-    @patch.dict(
-        os.environ,
-        {"YOUVERSION_MAX_CALLS": "20", "YOUVERSION_PERIOD": "30"}
-    )
+    @patch.dict(os.environ, {"YOUVERSION_MAX_CALLS": "20", "YOUVERSION_PERIOD": "30"})
     def test_with_env_vars(self):
         """Test with environment variables set."""
         limiter = get_limiter_from_env(
@@ -165,9 +163,7 @@ class TestGetLimiterFromEnv(unittest.TestCase):
     def test_invalid_env_var(self):
         """Test with invalid environment variable (should raise ValueError)."""
         with self.assertRaises(ValueError):
-            get_limiter_from_env(
-                "YOUVERSION", default_max_calls=10, default_period=60
-            )
+            get_limiter_from_env("YOUVERSION", default_max_calls=10, default_period=60)
 
 
 if __name__ == "__main__":

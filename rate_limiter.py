@@ -3,6 +3,7 @@ Rate limiting utilities for API calls.
 
 Provides a token-bucket style rate limiter that works asynchronously.
 """
+
 import asyncio
 import time
 from collections import deque
@@ -74,6 +75,7 @@ class RateLimiter:
 
 class RateLimitExceeded(Exception):
     """Exception raised when rate limit is exceeded (non-blocking mode)."""
+
     pass
 
 
@@ -117,12 +119,6 @@ def get_limiter_from_env(
     """
     import os
 
-    max_calls = int(os.getenv(
-        f"{env_var_prefix}_MAX_CALLS",
-        default_max_calls
-    ))
-    period = float(os.getenv(
-        f"{env_var_prefix}_PERIOD",
-        default_period
-    ))
+    max_calls = int(os.getenv(f"{env_var_prefix}_MAX_CALLS", default_max_calls))
+    period = float(os.getenv(f"{env_var_prefix}_PERIOD", default_period))
     return RateLimiter(max_calls=max_calls, period=period)

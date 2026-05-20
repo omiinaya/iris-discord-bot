@@ -4,6 +4,7 @@ HTTP client with connection pooling for the FaithUp Discord bot.
 Provides a shared requests.Session configured with connection pooling
 to reduce overhead of establishing new connections for each request.
 """
+
 import os
 import logging
 from typing import Optional, Any, Dict

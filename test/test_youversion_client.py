@@ -1,4 +1,5 @@
 """Unit tests for YouVersion client parallelization."""
+
 import asyncio
 import unittest
 from unittest.mock import AsyncMock, patch, MagicMock
@@ -39,10 +40,7 @@ class TestYouVersionClientParallel(unittest.TestCase):
             # Verify call
             self.mock_async_client.get.assert_called_once()
             call_args = self.mock_async_client.get.call_args
-            self.assertIn(
-                "reference=GEN.1",
-                call_args[1]["params"]["reference"]
-            )
+            self.assertIn("reference=GEN.1", call_args[1]["params"]["reference"])
 
         asyncio.run(test())
 
@@ -81,9 +79,7 @@ class TestYouVersionClientParallel(unittest.TestCase):
         error_response = MagicMock()
         error_response.status_code = 404
         error_response.text = "Not Found"
-        self.mock_async_client.get.side_effect = [
-            success_response, error_response
-        ]
+        self.mock_async_client.get.side_effect = [success_response, error_response]
 
         async def test():
             with self.assertRaises(ValueError):
@@ -96,52 +92,42 @@ class TestYouVersionClientParallel(unittest.TestCase):
     def test_get_formatted_verse_of_the_day_parallel_fallback(self):
         """Test that get_formatted_verse_of_the_day uses parallel fetch."""
         # Mock VOTD data with multiple USFM references
-        votd_data = {
-            "usfm": ["GEN.1.1", "EXO.1.1"],
-            "day": 1,
-            "image_id": "test"
-        }
-        with patch.object(self.client, 'get_verse_of_the_day',
-                          return_value=votd_data):
+        votd_data = {"usfm": ["GEN.1.1", "EXO.1.1"], "day": 1, "image_id": "test"}
+        with patch.object(self.client, "get_verse_of_the_day", return_value=votd_data):
             # Mock get_verse_texts to succeed
-            chapter_data = {
-                "response": {"data": {"content": "<span>verse</span>"}}
-            }
-            with patch.object(self.client, 'get_verse_texts',
-                              return_value=[chapter_data]) as mock_parallel:
+            chapter_data = {"response": {"data": {"content": "<span>verse</span>"}}}
+            with patch.object(
+                self.client, "get_verse_texts", return_value=[chapter_data]
+            ) as mock_parallel:
+
                 async def test():
-                    result = await self.client.get_formatted_verse_of_the_day(
-                        day=1
-                    )
+                    result = await self.client.get_formatted_verse_of_the_day(day=1)
                     self.assertEqual(result["usfm"], "GEN.1.1")
-                    mock_parallel.assert_called_once_with(
-                        ["GEN.1.1", "EXO.1.1"]
-                    )
+                    mock_parallel.assert_called_once_with(["GEN.1.1", "EXO.1.1"])
+
                 asyncio.run(test())
 
     def test_get_formatted_verse_of_the_day_parallel_fails_fallback(self):
         """Test that when parallel fetch fails, it falls back to sequential."""
-        votd_data = {
-            "usfm": ["GEN.1.1", "EXO.1.1"],
-            "day": 1,
-            "image_id": "test"
-        }
-        with patch.object(self.client, 'get_verse_of_the_day',
-                          return_value=votd_data):
+        votd_data = {"usfm": ["GEN.1.1", "EXO.1.1"], "day": 1, "image_id": "test"}
+        with patch.object(self.client, "get_verse_of_the_day", return_value=votd_data):
             # Mock get_verse_texts to raise ValueError
-            with patch.object(self.client, 'get_verse_texts',
-                              side_effect=ValueError("Parallel failed")):
+            with patch.object(
+                self.client,
+                "get_verse_texts",
+                side_effect=ValueError("Parallel failed"),
+            ):
                 # Mock get_verse_text to succeed
-                chapter_data = {
-                    "response": {"data": {"content": "<span>verse</span>"}}
-                }
-                with patch.object(self.client, 'get_verse_text',
-                                  return_value=chapter_data) as mock_seq:
+                chapter_data = {"response": {"data": {"content": "<span>verse</span>"}}}
+                with patch.object(
+                    self.client, "get_verse_text", return_value=chapter_data
+                ) as mock_seq:
+
                     async def test():
-                        result = await self.client\
-                            .get_formatted_verse_of_the_day(day=1)
+                        result = await self.client.get_formatted_verse_of_the_day(day=1)
                         self.assertEqual(result["usfm"], "GEN.1.1")
                         mock_seq.assert_called_once_with("GEN.1.1")
+
                     asyncio.run(test())
 
 

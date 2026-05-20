@@ -1,4 +1,5 @@
 """Tests for HTTP client connection pooling."""
+
 import unittest
 from unittest.mock import patch, MagicMock
 import requests
@@ -34,11 +35,14 @@ class TestHTTPClient(unittest.TestCase):
         # max_retries is a Retry object
         self.assertEqual(adapter.max_retries.total, 3)
 
-    @patch.dict("os.environ", {
-        "HTTP_POOL_CONNECTIONS": "5",
-        "HTTP_POOL_MAXSIZE": "20",
-        "HTTP_MAX_RETRIES": "1"
-    })
+    @patch.dict(
+        "os.environ",
+        {
+            "HTTP_POOL_CONNECTIONS": "5",
+            "HTTP_POOL_MAXSIZE": "20",
+            "HTTP_MAX_RETRIES": "1",
+        },
+    )
     def test_environment_configuration(self):
         """Test that environment variables affect pool configuration."""
         # Need to reload module to pick up new env vars, but singleton
@@ -54,6 +58,7 @@ class TestHTTPClient(unittest.TestCase):
             mock_response = MagicMock()
             mock_get.return_value = mock_response
             from http_client import get
+
             response = get("http://example.com", timeout=5)
             mock_get.assert_called_once_with(
                 "http://example.com", timeout=5, params=None, headers=None

@@ -4,6 +4,7 @@ Async HTTP client with connection pooling for the FaithUp Discord bot.
 Provides a shared httpx.AsyncClient configured with connection pooling
 to reduce overhead of establishing new connections for each request.
 """
+
 import os
 import logging
 from typing import Optional, Any, Dict
@@ -141,9 +142,7 @@ class AsyncHTTPClient:
     ) -> httpx.Response:
         """Perform a generic async request using the pooled client."""
         timeout = kwargs.pop("timeout", TIMEOUT)
-        return await self.client.request(
-            method, url, timeout=timeout, **kwargs
-        )
+        return await self.client.request(method, url, timeout=timeout, **kwargs)
 
     async def close(self) -> None:
         """Close the underlying client."""

@@ -10,6 +10,7 @@ from async_http_client import aget
 load_dotenv()
 logger = logging.getLogger("red.cogfaithup.sample")
 
+
 class MyCog(commands.Cog):
     """My custom cog for sample commands and listeners."""
 
@@ -29,16 +30,20 @@ class MyCog(commands.Cog):
     @commands.command()
     async def apicall(self, ctx: commands.Context, url: Optional[str] = None) -> None:
         """Makes an API call and returns the response. Optionally takes a URL argument."""
-        api_url = url or os.getenv('SAMPLE_API')
-        if not api_url or not api_url.startswith(('http://', 'https://')):
-            await ctx.send("API URL not configured or invalid. Please set SAMPLE_API in your .env file or provide a valid URL.")
+        api_url = url or os.getenv("SAMPLE_API")
+        if not api_url or not api_url.startswith(("http://", "https://")):
+            await ctx.send(
+                "API URL not configured or invalid. Please set SAMPLE_API in your .env file or provide a valid URL."
+            )
             return
         try:
             response = await aget(api_url, timeout=10)
-            logger.info("API call to %s returned status %s", api_url, response.status_code)
+            logger.info(
+                "API call to %s returned status %s", api_url, response.status_code
+            )
             if response.status_code == 200:
-                content_type = response.headers.get('Content-Type', '')
-                if 'application/json' in content_type:
+                content_type = response.headers.get("Content-Type", "")
+                if "application/json" in content_type:
                     data = response.json()
                     message = f"API Response: {data}"
                 else:
@@ -46,13 +51,16 @@ class MyCog(commands.Cog):
                     message = f"API Response: {data}"
                 # Truncate long responses for accessibility
                 if len(message) > 1800:
-                    message = message[:1800] + '... (truncated)'
+                    message = message[:1800] + "... (truncated)"
                 await ctx.send(message)
             else:
-                await ctx.send(f"Failed to retrieve data from the API. Status: {response.status_code}")
+                await ctx.send(
+                    f"Failed to retrieve data from the API. Status: {response.status_code}"
+                )
         except Exception as e:
             logger.error("API call failed: %s", e)
             await ctx.send(f"API call failed: {e}")
+
 
 def setup(bot):
     bot.add_cog(MyCog(bot))

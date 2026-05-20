@@ -1,4 +1,5 @@
 """Daily Announcements Cog for Discord bot using discord.ext.tasks."""
+
 import logging
 import discord
 from datetime import datetime
@@ -19,16 +20,12 @@ class AnnouncementsCog(commands.Cog):
         self.config = Config.get_conf(
             self, identifier=1234567890, force_registration=True
         )
-        
+
         # Default configuration
-        default_global = {
-            "announcements": [],
-            "enabled": True,
-            "default_channel": None
-        }
-        
+        default_global = {"announcements": [], "enabled": True, "default_channel": None}
+
         self.config.register_global(**default_global)
-        
+
         # Start the scheduler
         self.announcement_task.start()
         logger.info("AnnouncementsCog loaded and initialized.")
@@ -51,17 +48,22 @@ class AnnouncementsCog(commands.Cog):
             await ctx.send_help()
 
     @announcement_group.command(name="add")
-    async def announcement_add(self, ctx: commands.Context,
-                              channel: discord.TextChannel,
-                              time_str: str, *, message: str):
+    async def announcement_add(
+        self,
+        ctx: commands.Context,
+        channel: discord.TextChannel,
+        time_str: str,
+        *,
+        message: str,
+    ):
         """Add a daily announcement."""
         try:
             # Parse time
-            hour, minute = map(int, time_str.split(':'))
+            hour, minute = map(int, time_str.split(":"))
             if not (0 <= hour <= 23 and 0 <= minute <= 59):
                 await ctx.send("Invalid time format. Use HH:MM (24-hour).")
                 return
-            
+
             async with self.config.announcements() as announcements:
                 announcement_id = len(announcements) + 1
                 new_announcement = {
@@ -70,7 +72,7 @@ class AnnouncementsCog(commands.Cog):
                     "channel_id": channel.id,
                     "time": {"hour": hour, "minute": minute},
                     "message": message,
-                    "enabled": True
+                    "enabled": True,
                 }
                 announcements.append(new_announcement)
 
@@ -80,7 +82,7 @@ class AnnouncementsCog(commands.Cog):
                 f"**Time:** {time_str}\n"
                 f"**Message:** {message}"
             )
-            
+
         except ValueError:
             await ctx.send("Invalid time format. Use HH:MM (24-hour).")
         except Exception as e:
@@ -92,25 +94,24 @@ class AnnouncementsCog(commands.Cog):
         """List all announcements for this server."""
         announcements = await self.config.announcements()
         guild_announcements = [
-            ann for ann in announcements 
-            if ann.get("guild_id") == ctx.guild.id
+            ann for ann in announcements if ann.get("guild_id") == ctx.guild.id
         ]
-        
+
         if not guild_announcements:
             await ctx.send("No announcements configured for this server.")
             return
-        
-        embed = discord.Embed(title="📢 Server Announcements", color=0x00ff00)
-        
+
+        embed = discord.Embed(title="📢 Server Announcements", color=0x00FF00)
+
         for ann in guild_announcements:
             channel = self.bot.get_channel(ann["channel_id"])
             channel_name = channel.mention if channel else "Unknown Channel"
             time_str = f"{ann['time']['hour']:02d}:{ann['time']['minute']:02d}"
             status = "✅ Enabled" if ann.get("enabled", True) else "❌ Disabled"
-            msg_preview = ann['message'][:100]
-            if len(ann['message']) > 100:
-                msg_preview += '...'
-            
+            msg_preview = ann["message"][:100]
+            if len(ann["message"]) > 100:
+                msg_preview += "..."
+
             embed.add_field(
                 name=f"Announcement #{ann['id']}",
                 value=(
@@ -119,79 +120,71 @@ class AnnouncementsCog(commands.Cog):
                     f"**Status:** {status}\n"
                     f"**Message:** {msg_preview}"
                 ),
-                inline=False
+                inline=False,
             )
-        
+
         await ctx.send(embed=embed)
 
     @announcement_group.command(name="remove")
-    async def announcement_remove(self, ctx: commands.Context,
-                                announcement_id: int):
+    async def announcement_remove(self, ctx: commands.Context, announcement_id: int):
         """Remove an announcement by its ID."""
         async with self.config.announcements() as announcements:
             for i, ann in enumerate(announcements):
-                if (ann["id"] == announcement_id and 
-                        ann.get("guild_id") == ctx.guild.id):
+                if ann["id"] == announcement_id and ann.get("guild_id") == ctx.guild.id:
                     del announcements[i]
                     await ctx.send(f"✅ Announcement #{announcement_id} removed.")
                     return
-        
+
         await ctx.send(f"❌ Announcement #{announcement_id} not found.")
 
     @announcement_group.command(name="enable")
-    async def announcement_enable(self, ctx: commands.Context,
-                                 announcement_id: int):
+    async def announcement_enable(self, ctx: commands.Context, announcement_id: int):
         """Enable a disabled announcement."""
         async with self.config.announcements() as announcements:
             for ann in announcements:
-                if (ann["id"] == announcement_id and 
-                        ann.get("guild_id") == ctx.guild.id):
+                if ann["id"] == announcement_id and ann.get("guild_id") == ctx.guild.id:
                     ann["enabled"] = True
                     await ctx.send(f"✅ Announcement #{announcement_id} enabled.")
                     return
-        
+
         await ctx.send(f"❌ Announcement #{announcement_id} not found.")
 
     @announcement_group.command(name="disable")
-    async def announcement_disable(self, ctx: commands.Context,
-                                  announcement_id: int):
+    async def announcement_disable(self, ctx: commands.Context, announcement_id: int):
         """Disable an announcement."""
         async with self.config.announcements() as announcements:
             for ann in announcements:
-                if (ann["id"] == announcement_id and 
-                        ann.get("guild_id") == ctx.guild.id):
+                if ann["id"] == announcement_id and ann.get("guild_id") == ctx.guild.id:
                     ann["enabled"] = False
                     await ctx.send(f"✅ Announcement #{announcement_id} disabled.")
                     return
-        
+
         await ctx.send(f"❌ Announcement #{announcement_id} not found.")
 
     @announcement_group.command(name="test")
-    async def announcement_test(self, ctx: commands.Context,
-                               announcement_id: int):
+    async def announcement_test(self, ctx: commands.Context, announcement_id: int):
         """Test an announcement by sending it immediately."""
         announcements = await self.config.announcements()
         announcement = None
-        
+
         for ann in announcements:
-            if (ann["id"] == announcement_id and 
-                    ann.get("guild_id") == ctx.guild.id):
+            if ann["id"] == announcement_id and ann.get("guild_id") == ctx.guild.id:
                 announcement = ann
                 break
-        
+
         if not announcement:
             await ctx.send(f"❌ Announcement #{announcement_id} not found.")
             return
-        
+
         if not announcement.get("enabled", True):
             await ctx.send("❌ This announcement is disabled. Enable it first.")
             return
-        
+
         channel = self.bot.get_channel(announcement["channel_id"])
         if not channel:
             await ctx.send("❌ Announcement channel not found.")
             return
-        
+
         # Send the test announcement
         try:
             await channel.send(announcement["message"])
@@ -207,23 +200,25 @@ class AnnouncementsCog(commands.Cog):
         """Check every minute if it's time to send any announcements."""
         if not await self.config.enabled():
             return
-        
+
         announcements = await self.config.announcements()
         if not announcements:
             return
-        
+
         current_time = datetime.now().time()
         current_hour = current_time.hour
         current_minute = current_time.minute
-        
+
         for announcement in announcements:
             # Skip disabled announcements
             if not announcement.get("enabled", True):
                 continue
-            
+
             # Check if it's time for this announcement
-            if (announcement["time"]["hour"] == current_hour and 
-                    announcement["time"]["minute"] == current_minute):
+            if (
+                announcement["time"]["hour"] == current_hour
+                and announcement["time"]["minute"] == current_minute
+            ):
                 await self._send_announcement(announcement)
 
     async def _send_announcement(self, announcement: Dict):
@@ -231,25 +226,23 @@ class AnnouncementsCog(commands.Cog):
         try:
             channel = self.bot.get_channel(announcement["channel_id"])
             if not channel:
-                logger.warning("Channel not found for announcement #%s", 
-                             announcement['id'])
+                logger.warning(
+                    "Channel not found for announcement #%s", announcement["id"]
+                )
                 return
-            
+
             # Check if we have permission to send messages
             if not channel.permissions_for(channel.guild.me).send_messages:
-                logger.warning("No permission to send messages in %s", 
-                             channel.name)
+                logger.warning("No permission to send messages in %s", channel.name)
                 return
-            
+
             await channel.send(announcement["message"])
-            logger.info("Sent announcement #%s to %s", 
-                       announcement['id'], channel.name)
-            
+            logger.info("Sent announcement #%s to %s", announcement["id"], channel.name)
+
         except discord.Forbidden:
             logger.warning("No permission to send messages in channel")
         except Exception as e:
-            logger.error("Error sending announcement #%s: %s", 
-                        announcement['id'], e)
+            logger.error("Error sending announcement #%s: %s", announcement["id"], e)
 
     @announcement_task.before_loop
     async def before_announcement_task(self):
