@@ -1,18 +1,7 @@
-# Security Policy: Cogfaithup
+# Security Policy
 
 ## Reporting a Vulnerability
-Open an issue or contact the maintainer if you discover a security vulnerability.
 
-## Security Best Practices
-- Never commit secrets or credentials (use .env)
-- Validate and sanitize all user input
-- Use latest versions of dependencies
-- Log errors but avoid leaking sensitive info
+Please do not open public issues for security vulnerabilities.
 
-## Recommendations
-- Use strong, unique tokens for Discord and APIs
-- Regularly update dependencies (`pip list --outdated`)
-- Review code for security before deploying
-
-## Disclosure
-If you find a vulnerability, please disclose it responsibly.
+Contact the maintainer via Discord or GitHub Issues with `security` label.

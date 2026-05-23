@@ -1,26 +1,17 @@
-# Contributing to Cogfaithup
+# Contributing
 
-Thank you for considering contributing!
+## Getting Started
 
-## How to Contribute
-- Fork the repository and create a new branch for your feature or fix.
-- Add or update docstrings for all new functions and commands.
-- Add or update tests for new features (see `test/` directory).
-- Run tests and lint your code before submitting a pull request.
-- Update the README and documentation as needed.
+```bash
+git clone https://github.com/omiinaya/iris-discord-bot.git
+cd iris-discord-bot
+pip install -r requirements.txt
+```
 
-## Code Style
-- Use type hints for all functions and arguments.
-- Use descriptive commit messages.
-- Keep code modular and maintainable.
+## Commit Messages
 
-## Adding Commands
-- Use `@commands.cooldown` to prevent spam.
-- Validate and sanitize all user input.
-- Add help text and docstrings for all commands.
+```
+type: concise subject
+```
 
-## Reporting Issues
-- Please include error messages, steps to reproduce, and your environment info.
-
----
-For questions, open an issue or discussion on GitHub.
+Types: `feat:`, `fix:`, `docs:`, `refactor:`, `chore:`, `test:`
